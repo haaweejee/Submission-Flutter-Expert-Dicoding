@@ -40,6 +40,7 @@ final testMovieDetail = MovieDetail(
   voteCount: 1,
 );
 
+
 final testSeriesDetail = TvSeriesDetail(
     posterPath: '',
     genres: [Genre(id: 1, name: '')],

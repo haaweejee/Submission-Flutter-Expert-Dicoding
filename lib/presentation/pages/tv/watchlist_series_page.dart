@@ -1,10 +1,8 @@
-import 'package:ditonton/common/state_enum.dart';
 import 'package:ditonton/common/utils.dart';
-import 'package:ditonton/presentation/provider/movies/watchlist_movie_notifier.dart';
-import 'package:ditonton/presentation/provider/tv/watchlist_series_notifier.dart';
-import 'package:ditonton/presentation/widgets/movie_card_list.dart';
+import 'package:ditonton/presentation/bloc/series/watchlist/watchlist_series_bloc.dart';
 import 'package:ditonton/presentation/widgets/series_card_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class WatchlistSeriesPage extends StatefulWidget {
@@ -20,19 +18,20 @@ class _WatchlistSeriesPageState extends State<WatchlistSeriesPage>
   void initState() {
     super.initState();
     Future.microtask(() =>
-        Provider.of<WatchlistSeriesNotifier>(context, listen: false)
-            .fetchWatchlistSeries());
+        context.read<WatchListSeriesBloc>().add(GetWatchListSeries()));
+
+  }
+
+  @override
+  void didPopNext() {
+    Future.microtask(
+            () => context.read<WatchListSeriesBloc>().add(GetWatchListSeries()));
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
-  }
-
-  void didPopNext() {
-    Provider.of<WatchlistSeriesNotifier>(context, listen: false)
-        .fetchWatchlistSeries();
   }
 
   @override
@@ -43,24 +42,28 @@ class _WatchlistSeriesPageState extends State<WatchlistSeriesPage>
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Consumer<WatchlistSeriesNotifier>(
-          builder: (context, data, child) {
-            if (data.watchlistState == RequestState.Loading) {
+        child: BlocBuilder<WatchListSeriesBloc, WatchListSeriesState>(
+          builder: (context, state) {
+            if (state is WatchListSeriesLoading) {
               return Center(
                 child: CircularProgressIndicator(),
               );
-            } else if (data.watchlistState == RequestState.Loaded) {
+            } else if (state is WatchListSeriesHasData) {
               return ListView.builder(
                 itemBuilder: (context, index) {
-                  final series = data.watchlistSeries[index];
+                  final series = state.result[index];
                   return SeriesCard(series);
                 },
-                itemCount: data.watchlistSeries.length,
+                itemCount: state.result.length,
               );
-            } else {
+            } else if(state is WatchListSeriesError) {
               return Center(
                 key: Key('error_message'),
-                child: Text(data.message),
+                child: Text(state.message),
+              );
+            }else{
+              return Center(
+                child: Text('Empty Data'),
               );
             }
           },

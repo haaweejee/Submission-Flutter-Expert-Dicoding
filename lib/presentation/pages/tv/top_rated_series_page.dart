@@ -1,9 +1,7 @@
-import 'package:ditonton/common/state_enum.dart';
-import 'package:ditonton/presentation/provider/movies/top_rated_movies_notifier.dart';
-import 'package:ditonton/presentation/provider/tv/top_rated_series_notifier.dart';
-import 'package:ditonton/presentation/widgets/movie_card_list.dart';
+import 'package:ditonton/presentation/bloc/series/top_rated/top_rated_series_bloc.dart';
 import 'package:ditonton/presentation/widgets/series_card_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class TopRatedSeriesPage extends StatefulWidget {
@@ -18,8 +16,8 @@ class _TopRatedSeriesPageState extends State<TopRatedSeriesPage> {
   void initState() {
     super.initState();
     Future.microtask(() =>
-        Provider.of<TopRatedSeriesNotifier>(context, listen: false)
-            .fetchTopRatedSeries());
+        context.read<TopRatedSeriesBloc>().add(TopRatedSeries()));
+
   }
 
   @override
@@ -30,24 +28,28 @@ class _TopRatedSeriesPageState extends State<TopRatedSeriesPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Consumer<TopRatedSeriesNotifier>(
-          builder: (context, data, child) {
-            if (data.state == RequestState.Loading) {
+        child: BlocBuilder<TopRatedSeriesBloc, TopRatedSeriesState>(
+          builder: (context, state) {
+            if (state is TopRatedSeriesLoading) {
               return Center(
                 child: CircularProgressIndicator(),
               );
-            } else if (data.state == RequestState.Loaded) {
+            } else if (state is TopRatedSeriesHasData) {
               return ListView.builder(
                 itemBuilder: (context, index) {
-                  final series = data.series[index];
+                  final series = state.result[index];
                   return SeriesCard(series);
                 },
-                itemCount: data.series.length,
+                itemCount: state.result.length,
               );
-            } else {
+            } else if(state is TopRatedSeriesError) {
               return Center(
                 key: Key('error_message'),
-                child: Text(data.message),
+                child: Text(state.message),
+              );
+            }else{
+              return Center(
+                child: Text('Empty Data'),
               );
             }
           },
