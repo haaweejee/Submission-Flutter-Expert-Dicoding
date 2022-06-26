@@ -1,4 +1,5 @@
 import 'package:ditonton/common/constants.dart';
+import 'package:ditonton/common/ssl_spinning/http_ssl_spinning.dart';
 import 'package:ditonton/common/utils.dart';
 import 'package:ditonton/presentation/bloc/movie/detail/detail_movie_bloc.dart';
 import 'package:ditonton/presentation/bloc/movie/now_playing/now_playing_bloc.dart';
@@ -28,8 +29,6 @@ import 'package:ditonton/presentation/pages/tv/series_detail_page.dart';
 import 'package:ditonton/presentation/pages/tv/top_rated_series_page.dart';
 import 'package:ditonton/presentation/pages/tv/watchlist_series_page.dart';
 import 'package:ditonton/presentation/provider/movies/movie_detail_notifier.dart';
-import 'package:ditonton/presentation/provider/movies/movie_list_notifier.dart';
-import 'package:ditonton/presentation/provider/movies/movie_search_notifier.dart';
 import 'package:ditonton/presentation/provider/movies/popular_movies_notifier.dart';
 import 'package:ditonton/presentation/provider/movies/top_rated_movies_notifier.dart';
 import 'package:ditonton/presentation/provider/movies/watchlist_movie_notifier.dart';
@@ -45,7 +44,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:ditonton/injection.dart' as di;
 
-void main() {
+void main() async {
+  await HttpSSLPinning.init();
   di.init();
   runApp(MyApp());
 }
